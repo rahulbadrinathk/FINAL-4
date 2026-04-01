@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GST Bill Tracker</title>
+  <meta name="description" content="Track GST bills from and to, plus commissions. For bugs contact 7981413732 or rahul798141@gmail.com." />
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --primary-soft: #eff6ff;
+      --success: #065f46;
+      --success-soft: #ecfdf5;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --shadow: 0 10px 30px rgba(17,24,39,.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 0;
+    }
+
+    .logo {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: var(--primary);
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, .25);
+    }
+
+    h1 {
+      font-size: 26px;
+      margin: 0;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(3, 1fr);
+      margin: 24px 0 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .summary-card {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .summary-card.highlight {
+      background: var(--success-soft);
+      border-color: #a7f3d0;
+    }
+
+    .summary-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      background: #f3f4f6;
+    }
+
+    .summary-card.highlight .summary-icon {
+      background: #d1fae5;
+    }
+
+    .summary-label {
+      margin: 0 0 4px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .summary-value {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .section {
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 20px;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .field-group {
+      display: grid;
+      gap: 12px;
+    }
+
+    .subcard {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    .subcard-title {
+      margin: 0 0 12px;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      outline: none;
+      font-size: 15px;
+      transition: .18s ease;
+      background: white;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+    }
+
+    .mono { font-family: Consolas, Monaco, monospace; letter-spacing: .04em; }
+
+    .preview {
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: var(--primary-soft);
+      color: #1e3a8a;
+      font-weight: 600;
+      border: 1px solid #bfdbfe;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      padding: 13px 18px;
+      min-width: 180px;
+      box-shadow: 0 10px 22px rgba(37, 99, 235, .22);
+    }
+
+    .btn-secondary {
+      background: #111827;
+      color: white;
+      padding: 13px 18px;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--danger);
+      padding: 8px 12px;
+      border: 1px solid #fecaca;
+    }
+
+    .message {
+      display: none;
+      padding: 13px 16px;
+      border-radius: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .message.show { display: block; }
+    .message.success { background: var(--success-soft); color: var(--success); border: 1px solid #a7f3d0; }
+    .message.error { background: var(--danger-soft); color: #991b1b; border: 1px solid #fecaca; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+      background: white;
+    }
+
+    thead {
+      background: #f9fafb;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+    td.right, th.right { text-align: right; }
+    td strong.amount { color: var(--primary); }
+
+    .empty {
+      text-align: center;
+      padding: 30px 18px;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .summary-grid, .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <div class="brand">
+        <div class="logo">₹</div>
+        <div>
+          <h1>GST Bill Tracker</h1>
+          <p class="subtitle">Track bills from and to, plus commission details</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="grid summary-grid">
+      <div class="card summary-card">
+        <div class="summary-icon">📄</div>
+        <div>
+          <p class="summary-label">Total Bills</p>
+          <p class="summary-value" id="totalBills">0</p>
+        </div>
+      </div>
+      <div class="card summary-card">
+        <div class="summary-icon">📈</div>
+        <div>
+          <p class="summary-label">Total Amount</p>
+          <p class="summary-value" id="totalAmount">₹0 L</p>
+        </div>
+      </div>
+      <div class="card summary-card highlight">
+        <div class="summary-icon">💰</div>
+        <div>
+          <p class="summary-label">Total Commission</p>
+          <p class="summary-value" id="totalCommission">₹0</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card section">
+      <div class="pill">GitHub Pages Ready</div>
+      <h2 class="section-title">Add New Bill</h2>
+      <div id="message" class="message"></div>
+      <form id="billForm">
+        <div>
+          <label for="mediatorName">Mediator Name (who is bringing the bill)</label>
+          <input id="mediatorName" maxlength="100" placeholder="e.g. Suresh Kumar" required />
+        </div>
+
+        <div class="row">
+          <div class="subcard field-group">
+            <h3 class="subcard-title">From (Seller)</h3>
+            <div>
+              <label for="fromCompany">Company Name</label>
+              <input id="fromCompany" maxlength="150" placeholder="e.g. ABC Traders Pvt Ltd" required />
+            </div>
+            <div>
+              <label for="fromGst">GST Number</label>
+              <input id="fromGst" class="mono" maxlength="15" placeholder="e.g. 29ABCDE1234F1Z5" required />
+            </div>
+          </div>
+
+          <div class="subcard field-group">
+            <h3 class="subcard-title">To (Buyer)</h3>
+            <div>
+              <label for="toCompany">Company Name</label>
+              <input id="toCompany" maxlength="150" placeholder="e.g. XYZ Industries" required />
+            </div>
+            <div>
+              <label for="toGst">GST Number</label>
+              <input id="toGst" class="mono" maxlength="15" placeholder="e.g. 36FGHIJ5678K2Z3" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="amountInLakhs">Bill Amount (in Lakhs)</label>
+            <input id="amountInLakhs" type="number" min="0.01" step="0.01" placeholder="e.g. 5.50" required />
+          </div>
+          <div>
+            <label for="commissionPerLakh">Commission per Lakh (₹)</label>
+            <input id="commissionPerLakh" type="number" min="0" step="1" placeholder="e.g. 500" required />
+          </div>
+        </div>
+
+        <div class="preview" id="preview">Total Commission: ₹0</div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary">+ Add Bill</button>
+          <button type="button" class="btn-secondary" id="exportExcelBtn">📊 Export Excel</button>
+          <button type="button" class="btn-secondary" id="exportCsvBtn">📄 Export CSV</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card section">
+      <div class="toolbar">
+        <h2 class="section-title" style="margin:0;">All Bills (<span id="billCount">0</span>)</h2>
+        <div class="actions">
+          <button type="button" class="btn-ghost" id="clearAllBtn">Clear All Bills</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Mediator</th>
+              <th>From Company</th>
+              <th>From GST</th>
+              <th>To Company</th>
+              <th>To GST</th>
+              <th class="right">Amount (₹L)</th>
+              <th class="right">Comm/Lakh</th>
+              <th class="right">Total Comm.</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="billsBody">
+            <tr><td colspan="10" class="empty">No bills added yet. Add your first bill above.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="footer">For bugs/support: 7981413732 | rahul798141@gmail.com</p>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/2.8.0/xlsx.full.min.js"></script>
+  <script>
+    const STORAGE_KEY = 'gst-bills';
+    const GST_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z][A-Z\d]Z[A-Z\d]$/;
+
+    const form = document.getElementById('billForm');
+    const billsBody = document.getElementById('billsBody');
+    const totalBillsEl = document.getElementById('totalBills');
+    const totalAmountEl = document.getElementById('totalAmount');
+    const totalCommissionEl = document.getElementById('totalCommission');
+    const billCountEl = document.getElementById('billCount');
+    const previewEl = document.getElementById('preview');
+    const messageEl = document.getElementById('message');
+
+    const fields = {
+      mediatorName: document.getElementById('mediatorName'),
+      fromCompany: document.getElementById('fromCompany'),
+      fromGst: document.getElementById('fromGst'),
+      toCompany: document.getElementById('toCompany'),
+      toGst: document.getElementById('toGst'),
+      amountInLakhs: document.getElementById('amountInLakhs'),
+      commissionPerLakh: document.getElementById('commissionPerLakh')
+    };
+
+    function getBills() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveBills(bills) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(bills));
+    }
+
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      messageEl.className = 'message show ' + type;
+      clearTimeout(showMessage.timer);
+      showMessage.timer = setTimeout(() => {
+        messageEl.className = 'message';
+        messageEl.textContent = '';
+      }, 3000);
+    }
+
+    function formatDate(value) {
+      const d = new Date(value);
+      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function formatNumber(value) {
+      return Number(value).toLocaleString('en-IN');
+    }
+
+    function updatePreview() {
+      const amount = parseFloat(fields.amountInLakhs.value || '0');
+      const commission = parseFloat(fields.commissionPerLakh.value || '0');
+      const total = (!isNaN(amount) && !isNaN(commission)) ? amount * commission : 0;
+      previewEl.textContent = 'Total Commission: ₹' + formatNumber(total);
+    }
+
+    function renderSummary(bills) {
+      const totalAmount = bills.reduce((sum, bill) => sum + Number(bill.amountInLakhs), 0);
+      const totalCommission = bills.reduce((sum, bill) => sum + Number(bill.totalCommission), 0);
+      totalBillsEl.textContent = bills.length;
+      billCountEl.textContent = bills.length;
+      totalAmountEl.textContent = '₹' + formatNumber(totalAmount) + ' L';
+      totalCommissionEl.textContent = '₹' + formatNumber(totalCommission);
+    }
+
+    function renderBills() {
+      const bills = getBills();
+      renderSummary(bills);
+
+      if (!bills.length) {
+        billsBody.innerHTML = '<tr><td colspan="10" class="empty">No bills added yet. Add your first bill above.</td></tr>';
+        return;
+      }
+
+      billsBody.innerHTML = bills.map(bill => `
+        <tr>
+          <td>${formatDate(bill.date)}</td>
+          <td><strong>${escapeHtml(bill.mediatorName)}</strong></td>
+          <td>${escapeHtml(bill.fromCompany)}</td>
+          <td class="mono">${escapeHtml(bill.fromGst)}</td>
+          <td>${escapeHtml(bill.toCompany)}</td>
+          <td class="mono">${escapeHtml(bill.toGst)}</td>
+          <td class="right">${formatNumber(bill.amountInLakhs)}</td>
+          <td class="right">₹${formatNumber(bill.commissionPerLakh)}</td>
+          <td class="right"><strong class="amount">₹${formatNumber(bill.totalCommission)}</strong></td>
+          <td><button class="btn-ghost" onclick="deleteBill('${bill.id}')">Delete</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function deleteBill(id) {
+      const updated = getBills().filter(bill => bill.id !== id);
+      saveBills(updated);
+      renderBills();
+      showMessage('Bill deleted', 'success');
+    }
+
+    window.deleteBill = deleteBill;
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const mediatorName = fields.mediatorName.value.trim();
+      const fromCompany = fields.fromCompany.value.trim();
+      const fromGst = fields.fromGst.value.trim().toUpperCase();
+      const toCompany = fields.toCompany.value.trim();
+      const toGst = fields.toGst.value.trim().toUpperCase();
+      const amountInLakhs = parseFloat(fields.amountInLakhs.value);
+      const commissionPerLakh = parseFloat(fields.commissionPerLakh.value);
+
+      if (!GST_REGEX.test(fromGst)) {
+        showMessage("Invalid 'From' GST number format", 'error');
+        return;
+      }
+      if (!GST_REGEX.test(toGst)) {
+        showMessage("Invalid 'To' GST number format", 'error');
+        return;
+      }
+      if (!fromCompany) {
+        showMessage("Enter 'From' company name", 'error');
+        return;
+      }
+      if (!toCompany) {
+        showMessage("Enter 'To' company name", 'error');
+        return;
+      }
+      if (!mediatorName) {
+        showMessage('Enter mediator name', 'error');
+        return;
+      }
+      if (isNaN(amountInLakhs) || amountInLakhs <= 0) {
+        showMessage('Enter a valid amount in lakhs', 'error');
+        return;
+      }
+      if (isNaN(commissionPerLakh) || commissionPerLakh < 0) {
+        showMessage('Enter a valid commission per lakh', 'error');
+        return;
+      }
+
+      const bill = {
+        id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
+        mediatorName,
+        fromCompany,
+        fromGst,
+        toCompany,
+        toGst,
+        amountInLakhs,
+        commissionPerLakh,
+        totalCommission: amountInLakhs * commissionPerLakh,
+        date: new Date().toISOString()
+      };
+
+      const bills = getBills();
+      bills.unshift(bill);
+      saveBills(bills);
+      form.reset();
+      updatePreview();
+      renderBills();
+      showMessage('Bill added — Commission: ₹' + formatNumber(bill.totalCommission), 'success');
+    });
+
+    fields.fromGst.addEventListener('input', () => fields.fromGst.value = fields.fromGst.value.toUpperCase());
+    fields.toGst.addEventListener('input', () => fields.toGst.value = fields.toGst.value.toUpperCase());
+    fields.amountInLakhs.addEventListener('input', updatePreview);
+    fields.commissionPerLakh.addEventListener('input', updatePreview);
+
+    document.getElementById('clearAllBtn').addEventListener('click', function () {
+      if (!getBills().length) {
+        showMessage('No bills to clear', 'error');
+        return;
+      }
+      if (confirm('Do you want to delete all bills?')) {
+        saveBills([]);
+        renderBills();
+        showMessage('All bills cleared', 'success');
+      }
+    });
+
+    document.getElementById('exportCsvBtn').addEventListener('click', function () {
+      const bills = getBills();
+      if (!bills.length) {
+        showMessage('No bills available to export', 'error');
+        return;
+      }
+
+      const headers = [
+        'Date', 'Mediator', 'From Company', 'From GST', 'To Company', 'To GST',
+        'Amount in Lakhs', 'Commission per Lakh', 'Total Commission'
+      ];
+
+      const rows = bills.map(bill => [
+        formatDate(bill.date),
+        bill.mediatorName,
+        bill.fromCompany,
+        bill.fromGst,
+        bill.toCompany,
+        bill.toGst,
+        bill.amountInLakhs,
+        bill.commissionPerLakh,
+        bill.totalCommission
+      ]);
+
+      const csv = [headers, ...rows]
+        .map(row => row.map(value => '"' + String(value).replaceAll('"', '""') + '"').join(','))
+        .join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'gst-bills.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showMessage('CSV exported successfully', 'success');
+    });
+
+    document.getElementById('exportExcelBtn').addEventListener('click', function () {
+      const bills = getBills();
+      if (!bills.length) {
+        showMessage('No bills available to export', 'error');
+        return;
+      }
+
+      const headers = [
+        'Date', 'Mediator', 'From Company', 'From GST', 'To Company', 'To GST',
+        'Amount in Lakhs', 'Commission per Lakh', 'Total Commission'
+      ];
+
+      const data = bills.map(bill => ([
+        formatDate(bill.date),
+        bill.mediatorName,
+        bill.fromCompany,
+        bill.fromGst,
+        bill.toCompany,
+        bill.toGst,
+        Number(bill.amountInLakhs),
+        Number(bill.commissionPerLakh),
+        Number(bill.totalCommission)
+      ]));
+
+      const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+      worksheet['!cols'] = [
+        { wch: 12 },
+        { wch: 18 },
+        { wch: 20 },
+        { wch: 18 },
+        { wch: 20 },
+        { wch: 18 },
+        { wch: 14 },
+        { wch: 16 },
+        { wch: 16 }
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Bills');
+      
+      XLSX.write(workbook, { bookType: 'xlsx', type: 'binary', filename: 'gst-bills.xlsx' });
+      XLSX.writeFile(workbook, 'gst-bills.xlsx');
+      
+      showMessage('Excel exported successfully', 'success');
+    });
+
+    updatePreview();
+    renderBills();
+  </script>
+</body>
+</html>
